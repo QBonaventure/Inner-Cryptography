@@ -1,0 +1,20 @@
+{
+    "name": "qbonaventure/blog",
+    "description": "simple cryptography service",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "zf2",
+        "cryptography"
+    ],
+    "homepage": "https://github.com/QBonaventure/Inner-Cryptography",
+    "autoload": {
+        "psr-4": {
+            "QBonaventure\\Inner-Cryptography\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^5.3 || ^7.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false
+}
