@@ -1,0 +1,21 @@
+<?php
+return array(
+    'modules' => array(
+        //'MyService',
+    ),
+    'module_listener_options' => array(
+        'config_glob_paths'    => array(
+            '../../../config/autoload/{,*.}{global,local}.php',
+        ),
+        'module_paths' => array(
+            './module',
+            './vendor',
+        ),
+    ),
+	'cryptography' => array(
+		'key'	=> 'JoqXQkZEKXuHBxzs6iAfBHDIULTtrJPqI1IYDS0Ffy0ToPWUjDi4HeDqIbYl2FgkcsXwZQs29tr9cvOZ6w4thsTaq1VZtTOYRkG5eJG2UX8zuBkptrPRJ3P6sGAmMQ62HWgbtyXtVG76n8qm0PoZieTOshdYnas7EMfQ9xzkkUV9boTeat0T9kuZzU6MkD8R24s8dAnJluuus8snF2CbUpNVAPzR7Z52q0Rn0zvhbHjLg58n8qhnuGQ3ZiMIOABJPL1da8OPWA3IcgAenKl+MG9SaPYnOl9eXfNyGFL+lbP2Lyhbgy57bFpaCthxGYE4v4OAPYvCMrz0HCeZrJFkZzTdMG3pHSt9Z+yZ6Z4ZsqnqnT2Gaan94zHwqlMgGi1Wm9UqaErJv94yXoiZfNlRCVBdNYUvT6Q0SrSVAKhZ9iMrwURatmZ0YlTamJg7wq6WHPexkZh8G8m0063H5rcCdTsB7qRaKnGxUOpthpvtZyyR1LIxuv7HPPXiOAKcsC90',
+		'iv'	=> 'FRQYrUYtwNWPZNxY',
+		'method'	=> 'aes-256-cbc',
+		'hashAlgo'	=> 'sha256',
+	),
+);

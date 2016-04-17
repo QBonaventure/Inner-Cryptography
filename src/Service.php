@@ -23,10 +23,18 @@ class Service {
 		return $this->config;
 	}
 	
-	protected function setConfig(Config $config) {
+	public function setConfig(Config $config) {
 		$this->config	= $config;
+		
+		if(is_null($config['key']))
+			throw new \InvalidArgumentException('The "key" must be configured');
 		$this->key	= $config['key'];
-		$this->iv	= $config['IV'];
+
+
+		if(is_null($config['iv']))
+			throw new \InvalidArgumentException('The "IV" must be configured');
+		$this->iv	= $config['iv'];
+		
 		if($config['hash_algo'])
 			$this->hashAlgo	= $config['hash_algo'];
 		if($config['method'])
@@ -62,11 +70,11 @@ class Service {
 	}
 	
 	
-	public function encrypt($message, $key = null, $encode = false) {
+	public function encrypt($message, $key = null, $encode = false) {		
 		if(is_null($key))
 			$key	= $this->key;
 		
-		list($encKey, $authKey) = self::splitKeys($key);
+		list($encKey, $authKey) = $this->splitKeys($key);
 	
 	
 		$ivSize = openssl_cipher_iv_length($this->method);
@@ -93,11 +101,11 @@ class Service {
 		if(is_null($key))
 			$key	= $this->key;
 		
-		list($encKey, $authKey) = self::splitKeys($key);
-	
+		list($encKey, $authKey) = $this->splitKeys($key);
+
 	
 		if($encoded) {
-			$hs = mb_strlen(base64_encode(hash_hmac(self::HASH_ALGO, '', $authKey, true)));
+			$hs = mb_strlen(base64_encode(hash_hmac($this->hashAlgo, '', $authKey, true)));
 			$mac = base64_decode(mb_substr($message, 0, $hs));
 			$ciphertext = base64_decode(mb_substr($message, $hs));
 		}
@@ -112,7 +120,7 @@ class Service {
 				$authKey,
 				true);
 	
-		if (!self::hashEquals($mac, $calculated)) {
+		if (!$this->hashEquals($mac, $calculated)) {
 			throw new Exception('Encryption failure');
 		}
 	
@@ -125,7 +133,7 @@ class Service {
 				$encKey,
 				'OPENSSL_ZERO_PADDING',
 				$iv);
-	
+	var_dump($plaintext);
 		return mb_substr($plaintext, openssl_cipher_iv_length($this->method));
 		return $plaintext;
 	}
