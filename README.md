@@ -46,5 +46,5 @@ Installation
     );
     ```
 
-2. Copy config/mail.global.php.dist and config/mail.local.php.dist to your config directory
+2. Copy config/cryptography.global.php.dist to your config directory
 3. Remove the .dist extension from these files and fill in the blanks
