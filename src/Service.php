@@ -1,16 +1,27 @@
 <?php
-namespace Inner\Cryptography;
+namespace QBonaventure\InnerCryptography;
 
+use Zend\Config\Config;
 
 class Service {
 	
 	const METHOD	= 'aes-256-cbc';
 	const HASH_ALGO = 'sha256';
-	const KEY		= 'JoqXQkZEKXuHBxzs6iAfBHDIULTtrJPqI1IYDS0Ffy0ToPWUjDi4HeDqIbYl2FgkcsXwZQs29tr9cvOZ6w4thsTaq1VZtTOYRkG5eJG2UX8zuBkptrPRJ3P6sGAmMQ62HWgbtyXtVG76n8qm0PoZieTOshdYnas7EMfQ9xzkkUV9boTeat0T9kuZzU6MkD8R24s8dAnJluuus8snF2CbUpNVAPzR7Z52q0Rn0zvhbHjLg58n8qhnuGQ3ZiMIOABJPL1da8OPWA3IcgAenKl+MG9SaPYnOl9eXfNyGFL+lbP2Lyhbgy57bFpaCthxGYE4v4OAPYvCMrz0HCeZrJFkZzTdMG3pHSt9Z+yZ6Z4ZsqnqnT2Gaan94zHwqlMgGi1Wm9UqaErJv94yXoiZfNlRCVBdNYUvT6Q0SrSVAKhZ9iMrwURatmZ0YlTamJg7wq6WHPexkZh8G8m0063H5rcCdTsB7qRaKnGxUOpthpvtZyyR1LIxuv7HPPXiOAKcsC90';
-	const IV		= 'FRQYrUYtwNWPZNxY';
+	protected $key;
+	protected $iv;
+	
+	public function __construct(Config $config) {
+		$this->key	= $config['key'];
+		$this->iv	= $config['IV'];
+	}
 	
 	
-	public static function weakEncrypt($message, $key = self::KEY, $encode = false, $iv = self::IV) {
+	public static function weakEncrypt($message, $key = null, $encode = false, $iv = null) {
+		if(is_null($key))
+			$key	= $this->key;
+		if(is_null($iv))
+			$iv	= $this->iv;
+		
 		$crypt	= @openssl_encrypt($message, self::METHOD, $key, 'OPENSSL_ZERO_PADDING', $iv);
 		if($encode)
 			return base64_encode($crypt);
@@ -19,14 +30,22 @@ class Service {
 	}
 	
 	
-	public static function weakDecrypt($message, $key = self::KEY, $encoded = false, $iv = self::IV) {
+	public static function weakDecrypt($message, $key = null, $encoded = false, $iv = null) {
+		if(is_null($key))
+			$key	= $this->key;
+		if(is_null($iv))
+			$iv	= $this->iv;
+		
 		if($encoded)
 			$message	= base64_decode($message);
 			return @openssl_decrypt($message, self::METHOD, $key, 'OPENSSL_ZERO_PADDING', $iv);
 	}
 	
 	
-	public static function encrypt($message, $key = self::KEY, $encode = false) {
+	public function encrypt($message, $key = null, $encode = false) {
+		if(is_null($key))
+			$key	= $this->key;
+		
 		list($encKey, $authKey) = self::splitKeys($key);
 	
 	
@@ -50,7 +69,10 @@ class Service {
 	
 	
 	
-	public static function decrypt($message, $key = self::KEY, $encoded = false) {
+	public static function decrypt($message, $key = null, $encoded = false) {
+		if(is_null($key))
+			$key	= $this->key;
+		
 		list($encKey, $authKey) = self::splitKeys($key);
 	
 	
