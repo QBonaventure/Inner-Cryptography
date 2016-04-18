@@ -1,4 +1,10 @@
 <?php
+/**
+ * @author	Quentin Bonaventure
+ * @link    https://github.com/QBonaventure/Inner-Cryptography for the canonical source repository
+ * @license New BSD License
+ */
+
 namespace QBonaventure\InnerCryptography;
 
 use Zend\Config\Config;
@@ -10,11 +16,34 @@ class Service {
 	 */
 	protected $config;
 	
+	/**
+	 * Default cypher method
+	 * @var $method
+	 */
 	protected $method	= 'aes-256-cbc';
+	
+	/**
+	 * Default hash algorithm 
+	 * @var $hashAlgo
+	 */
 	protected $hashAlgo = 'sha256';
+	
+	/**
+	 * Encryption key
+	 * @var $key
+	 */
 	protected $key;
+	
+	/**
+	 * Initialisation vector, used for weak encryption
+	 * @var $iv
+	 */
 	protected $iv;
 	
+	/**
+	 * 
+	 * @param Zend\Config\Config $config
+	 */
 	public function __construct(Config $config) {
 		$this->setConfig($config);
 	}
@@ -50,7 +79,7 @@ class Service {
 		if(is_null($iv))
 			$iv	= $this->iv;
 		
-		$crypt	= @openssl_encrypt($message, $this->method, $key, 'OPENSSL_ZERO_PADDING', $iv);
+		$crypt	= openssl_encrypt($message, $this->method, $key, OPENSSL_RAW_DATA, $iv);
 		if($encode)
 			return base64_encode($crypt);
 			else
@@ -63,10 +92,9 @@ class Service {
 			$key	= $this->key;
 		if(is_null($iv))
 			$iv	= $this->iv;
-		
 		if($encoded)
 			$message	= base64_decode($message);
-			return @openssl_decrypt($message, $this->method, $key, 'OPENSSL_ZERO_PADDING', $iv);
+			return openssl_decrypt($message, $this->method, $key, OPENSSL_RAW_DATA, $iv);
 	}
 	
 	
@@ -76,23 +104,22 @@ class Service {
 		
 		list($encKey, $authKey) = $this->splitKeys($key);
 	
-	
 		$ivSize = openssl_cipher_iv_length($this->method);
 		$iv = openssl_random_pseudo_bytes($ivSize);
+
 	
-		$cyphertext = @openssl_encrypt($message,
+		$cyphertext = openssl_encrypt($message,
 				$this->method,
 				$encKey,
-				'OPENSSL_ZERO_PADDING',
+				OPENSSL_RAW_DATA,
 				$iv);
-	
+
 		$cyphertext	= $iv . $cyphertext;
-	
 		$mac = hash_hmac($this->hashAlgo, $cyphertext, $authKey, true);
-	
+
 		if ($encode)
 			return base64_encode($mac).base64_encode($cyphertext);
-			return $mac.$cyphertext;
+		return $mac.$cyphertext;
 	}
 	
 	
@@ -114,7 +141,7 @@ class Service {
 			$mac = mb_substr($message, 0, $hs, '8bit');
 			$ciphertext = mb_substr($message, $hs, mb_strlen($message), '8bit');
 		}
-	
+
 		$calculated = hash_hmac($this->hashAlgo,
 				$ciphertext,
 				$authKey,
@@ -124,28 +151,36 @@ class Service {
 			throw new Exception('Encryption failure');
 		}
 	
-	
 		$ivSize = openssl_cipher_iv_length($this->method);
 		$iv = mb_substr($ciphertext, 0, $ivSize, '8bit');
-	
-		$plaintext = @openssl_decrypt($ciphertext,
+		
+		$plaintext = openssl_decrypt($ciphertext,
 				$this->method,
 				$encKey,
-				'OPENSSL_ZERO_PADDING',
+				true,
 				$iv);
-	var_dump($plaintext);
-		return mb_substr($plaintext, openssl_cipher_iv_length($this->method));
-		return $plaintext;
+		
+		return substr($plaintext, openssl_cipher_iv_length($this->method), mb_strlen($plaintext));
 	}
 	
 	
+	
+	/**
+	 * HKDF for keys derivation.
+	 * @param string $masterKey
+	 * @return string[]
+	 */
 	protected function splitKeys($masterKey) {
-		// You really want to implement HKDF here instead!
 		return array(hash_hmac($this->hashAlgo, 'ENCRYPTION', $masterKey, true),
-				hash_hmac($this->hashAlgo, 'AUTHENTICATION', $masterKey, true));
+					 hash_hmac($this->hashAlgo, 'AUTHENTICATION', $masterKey, true));
 	}
 	
-	
+	/**
+	 * Tests whether the provided hashes are equal
+	 * @param string $a
+	 * @param string $b
+	 * @return boolean
+	 */
 	protected function hashEquals($a, $b) {
 		if (function_exists('hash_equals')) {
 			return hash_equals($a, $b);
