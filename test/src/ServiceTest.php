@@ -30,7 +30,6 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase {
         $this->serviceLocator    = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
         $this->factory	= new ServiceFactory();
         $this->config	= Bootstrap::getConfig();
-        var_dump($this->config);
     }
 	
 	public function testKeyNotConfiguredRaiseException() {
