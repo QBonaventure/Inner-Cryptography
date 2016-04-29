@@ -41,6 +41,12 @@ class Service {
 	protected $iv;
 	
 	/**
+	 * Hash cost for the PHP password_hash() function
+	 * @var $cost
+	 */
+	protected $cost;
+	
+	/**
 	 * 
 	 * @param Zend\Config\Config $config
 	 */
@@ -52,6 +58,8 @@ class Service {
 		return $this->config;
 	}
 	
+	
+	
 	public function setConfig(Config $config) {
 		$this->config	= $config;
 		
@@ -59,10 +67,17 @@ class Service {
 			throw new \InvalidArgumentException('The "key" must be configured');
 		$this->key	= $config['key'];
 
-
 		if(is_null($config['iv']))
 			throw new \InvalidArgumentException('The "IV" must be configured');
 		$this->iv	= $config['iv'];
+		
+
+		if(!is_null($config['hashCost']))
+		{
+			if($config['hashCost'] <= 0)
+				throw new \InvalidArgumentException('When set, "cost" param must be an integer superior to 0');
+			$this->cost	= $config['hashCost'];
+		}
 		
 		if($config['hash_algo'])
 			$this->hashAlgo	= $config['hash_algo'];
@@ -163,6 +178,33 @@ class Service {
 		return substr($plaintext, openssl_cipher_iv_length($this->method), mb_strlen($plaintext));
 	}
 	
+
+
+
+	/**
+	 * Simple access to the PHP password_hash() function http://php.net/manual/fr/function.password-hash.php
+	 * along with the config set by the user.
+	 * @param string $string The string to hash
+	 * @return string A hash
+	 */
+	function hash($string) {
+		$options = array();
+		if(!is_null($this->cost))
+			$options	= array('cost'	=> $this->cost);
+		
+		return password_hash($string, PASSWORD_DEFAULT, $options);
+	}
+	
+	
+	/**
+	 * Simple access to the PHP password_verify() function http://php.net/manual/fr/function.password-verify.php
+	 * @param string $string The string to check
+	 * @param string $hash The hash to check the $string against
+	 * @return boolean
+	 */
+	function checkHash($string, $hash) {
+		return password_verify($string, $hash);
+	}
 	
 	
 	/**
