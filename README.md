@@ -24,8 +24,14 @@ Installation
 
     ```json
     "require": {
+    	// ...
         "qbonaventure/Inner-Cryptography": "dev-master"
     }
+	"autoload": {
+		"psr-4": {// ...
+			"QBonaventure\\InnerCryptography\\": "vendor/qbonaventure/inner-cryptography/src/"
+		}
+	}
     ```
     
 #### Post installation
@@ -39,7 +45,7 @@ Installation
         'service_manager' => array(
 	        'factories' => array(
 	         	// ...
-	        	'CryptographyInterface'	=> 'QBonaventure\InnerCryptography\ServiceFactory',	
+    			'CryptographyInterface'	=> 'QBonaventure\InnerCryptography\ServiceFactory',	
 	        ),
         ),
         // ...
@@ -47,4 +53,27 @@ Installation
     ```
 
 2. Copy config/cryptography.global.php.dist to your config directory
-3. Remove the .dist extension from these files and fill in the blanks
+3. Remove the .dist extension from these files and fill in the blanks (see "Configuration")
+
+
+### Configuration
+
+    ```php
+	<?php
+	return array(
+		'cryptography' => array(
+			'key'	=> '',
+			'iv'	=> '',
+			'method'	=> 'aes-512-cbc',
+			'hashAlgo'	=> 'sha256',
+			'hashCost'		=> null,
+		),
+	);
+	```
+
+
+- "key" must be a long string of random letters and numbers, like 200+
+- "iv" is a vector that can consisted of about 20 random letters and numbers
+- "method" is the encryption method, default is "aes-512-cbc"
+- "hashAlgo" is the hashing algorithm used for encryption, default is "sha256"
+- "hashCost" is the hash function cost for password_hash(). "null" defaults to the function default : 10 
