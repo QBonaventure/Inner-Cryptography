@@ -63,16 +63,18 @@ class Service {
 	public function setConfig(Config $config) {
 		$this->config	= $config;
 		
-		if(is_null($config['key']))
+		if (is_null($config['key'])) {
 			throw new \InvalidArgumentException('The "key" must be configured');
+		}
 		$this->key	= $config['key'];
 
-		if(is_null($config['iv']))
+		if (is_null($config['iv'])) {
 			throw new \InvalidArgumentException('The "IV" must be configured');
+		}
 		$this->iv	= $config['iv'];
 		
 
-		if(!is_null($config['hashCost']))
+		if (!is_null($config['hashCost']))
 		{
 			if($config['hashCost'] <= 0)
 				throw new \InvalidArgumentException('When set, "cost" param must be an integer superior to 0');
@@ -89,78 +91,88 @@ class Service {
 	
 	
 	public function weakEncrypt($message, $key = null, $encode = false, $iv = null) {
-		if(is_null($key))
+		if (is_null($key)) {
 			$key	= $this->key;
-		if(is_null($iv))
+		}
+		if (is_null($iv)) {
 			$iv	= $this->iv;
+		}
 		
 		$crypt	= openssl_encrypt($message, $this->method, $key, OPENSSL_RAW_DATA, $iv);
-		if($encode)
-			return base64_encode($crypt);
-			else
-				return $crypt;
+		
+		if($encode) {
+			$crypt   = base64_encode($crypt);
+        }
+        
+        return $crypt;
 	}
 	
 	
 	public function weakDecrypt($message, $key = null, $encoded = false, $iv = null) {
-		if(is_null($key))
+		if (is_null($key)) {
 			$key	= $this->key;
-		if(is_null($iv))
+		}
+		if (is_null($iv)) {
 			$iv	= $this->iv;
-		if($encoded)
+		}
+		if ($encoded) {
 			$message	= base64_decode($message);
-			return openssl_decrypt($message, $this->method, $key, OPENSSL_RAW_DATA, $iv);
+        }
+        
+        return openssl_decrypt($message, $this->method, $key, OPENSSL_RAW_DATA, $iv);
 	}
 	
 	
 	public function encrypt($message, $key = null, $encode = false) {		
-		if(is_null($key))
+		if (is_null($key)) {
 			$key	= $this->key;
+		}
 		
 		list($encKey, $authKey) = $this->splitKeys($key);
 	
 		$ivSize = openssl_cipher_iv_length($this->method);
 		$iv = openssl_random_pseudo_bytes($ivSize);
 
-	
 		$cyphertext = openssl_encrypt($message,
-				$this->method,
-				$encKey,
-				OPENSSL_RAW_DATA,
-				$iv);
+                        				$this->method,
+                        				$encKey,
+                        				OPENSSL_RAW_DATA,
+                        				$iv);
 
 		$cyphertext	= $iv . $cyphertext;
 		$mac = hash_hmac($this->hashAlgo, $cyphertext, $authKey, true);
 
-		if ($encode)
+		if ($encode) {
 			return base64_encode($mac).base64_encode($cyphertext);
+		}
+		
 		return $mac.$cyphertext;
 	}
 	
 	
 	
 	public function decrypt($message, $key = null, $encoded = false) {
-		if(is_null($key))
+		if (is_null($key)) {
 			$key	= $this->key;
+        }
 		
 		list($encKey, $authKey) = $this->splitKeys($key);
 
 	
-		if($encoded) {
+		if ($encoded) {
 			$hs = mb_strlen(base64_encode(hash_hmac($this->hashAlgo, '', $authKey, true)));
 			$mac = base64_decode(mb_substr($message, 0, $hs));
 			$ciphertext = base64_decode(mb_substr($message, $hs));
-		}
-		else {
+		} else {
 			$hs = mb_strlen(hash($this->hashAlgo, '', true), '8bit');
 			$mac = mb_substr($message, 0, $hs, '8bit');
 			$ciphertext = mb_substr($message, $hs, mb_strlen($message), '8bit');
 		}
 
 		$calculated = hash_hmac($this->hashAlgo,
-				$ciphertext,
-				$authKey,
-				true);
+                				$ciphertext,
+                				$authKey,
+                				true);
 	
 		if (!$this->hashEquals($mac, $calculated)) {
 			throw new Exception('Encryption failure');
@@ -189,7 +201,7 @@ class Service {
 	 */
 	function hash($string) {
 		$options = [];
-		if(!is_null($this->cost))
+		if (!is_null($this->cost))
 			$options	= ['cost'	=> $this->cost];
 		
 		return password_hash($string, PASSWORD_DEFAULT, $options);
@@ -213,8 +225,8 @@ class Service {
 	 * @return string[]
 	 */
 	protected function splitKeys($masterKey) {
-		return array(hash_hmac($this->hashAlgo, 'ENCRYPTION', $masterKey, true),
-					 hash_hmac($this->hashAlgo, 'AUTHENTICATION', $masterKey, true));
+		return [hash_hmac($this->hashAlgo, 'ENCRYPTION', $masterKey, true),
+                hash_hmac($this->hashAlgo, 'AUTHENTICATION', $masterKey, true)];
 	}
 	
 	/**
@@ -227,6 +239,7 @@ class Service {
 		if (function_exists('hash_equals')) {
 			return hash_equals($a, $b);
 		}
+		
 		$nonce = openssl_random_pseudo_bytes(32);
 		return hash_hmac($this->hashAlgo, $a, $nonce) === hash_hmac($this->hashAlgo, $b, $nonce);
 	}
