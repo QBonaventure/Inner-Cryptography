@@ -188,9 +188,9 @@ class Service {
 	 * @return string A hash
 	 */
 	function hash($string) {
-		$options = array();
+		$options = [];
 		if(!is_null($this->cost))
-			$options	= array('cost'	=> $this->cost);
+			$options	= ['cost'	=> $this->cost];
 		
 		return password_hash($string, PASSWORD_DEFAULT, $options);
 	}
