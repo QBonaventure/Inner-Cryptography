@@ -74,17 +74,20 @@ class Service {
 		$this->iv	= $config['iv'];
 		
 
-		if (!is_null($config['hashCost']))
-		{
-			if($config['hashCost'] <= 0)
+		if (!is_null($config['hashCost'])) {
+			if($config['hashCost'] <= 0) {
 				throw new \InvalidArgumentException('When set, "cost" param must be an integer superior to 0');
+			}
 			$this->cost	= $config['hashCost'];
 		}
 		
-		if($config['hash_algo'])
+		if($config['hash_algo']) {
 			$this->hashAlgo	= $config['hash_algo'];
-		if($config['method'])
+		}
+		
+		if($config['method']) {
 			$this->method	= $config['method'];
+		}
 		
 		return $this;
 	}
